@@ -1,0 +1,10 @@
+gradio
+requests
+ffmpeg-python
+bark
+diffusers
+transformers
+accelerate
+safetensors
+scipy
+torch
