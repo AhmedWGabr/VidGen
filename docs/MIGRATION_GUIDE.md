@@ -14,12 +14,48 @@ The new VidGen structure provides:
 
 ## Migration Checklist
 
-### 📋 Pre-Migration Steps
+## Migration Checklist
 
-- [ ] **Backup Current Project**: Create a backup of your existing VidGen installation
-- [ ] **Review Dependencies**: Check your current `requirements.txt`
-- [ ] **Document Custom Changes**: Note any customizations you've made
-- [ ] **Test Current Functionality**: Ensure your current setup works
+### 📋 Pre-Migration Assessment
+
+- [ ] **Backup Current Project**: 
+  ```bash
+  cp -r VidGen VidGen_backup_$(date +%Y%m%d)
+  tar -czf vidgen_backup.tar.gz VidGen_backup_*
+  ```
+- [ ] **Document Current Setup**: Note Python version, dependencies, custom configurations
+- [ ] **Test Current Functionality**: Run existing scripts to ensure they work
+- [ ] **Review Custom Changes**: Document any modifications you've made to the original code
+- [ ] **Check Dependencies**: Export current requirements: `pip freeze > old_requirements.txt`
+- [ ] **Identify Integration Points**: Note any external systems that use VidGen
+
+### 🎯 Migration Strategy
+
+Choose your migration approach based on your situation:
+
+#### Strategy A: Clean Install (Recommended)
+Best for: New projects, minimal customizations, or when you want the cleanest setup.
+
+1. Install new VidGen in a separate environment
+2. Migrate configuration and scripts
+3. Test thoroughly before switching
+4. Archive old installation
+
+#### Strategy B: In-Place Upgrade
+Best for: Production systems, extensive customizations, or when downtime must be minimized.
+
+1. Create development branch
+2. Gradually update components
+3. Maintain backward compatibility
+4. Deploy incrementally
+
+#### Strategy C: Parallel Installation
+Best for: Large projects, complex integrations, or when you need gradual transition.
+
+1. Install new version alongside old
+2. Migrate components one by one
+3. Use feature flags to switch between versions
+4. Complete migration over time
 
 ### 🔄 Code Migration Steps
 
@@ -51,67 +87,75 @@ VidGen/
 
 #### 2. Update Imports
 
-**Configuration:**
+**Configuration Management:**
 ```python
-# Old
+# Old approach
 from config import Config
 config = Config()
+config.OUTPUT_DIR = "custom_path"
 
-# New
-from src.vidgen.core.config import Config
-config = Config()
+# New approach
+from vidgen.core.config import VideoGenConfig
+VideoGenConfig.OUTPUT_DIR = "custom_path"
+
+# Or using the new configuration system
+from vidgen.core.config import VideoGenConfig
+VideoGenConfig.load_from_file("config.yaml")
 ```
 
-**Audio Generation:**
+**Model Imports:**
 ```python
-# Old
+# Old scattered imports
 from models.audio import generate_audio
-audio_path = generate_audio("background music")
-
-# New
-from src.vidgen.models.audio import AudioModel
-audio_model = AudioModel(config)
-audio_path = audio_model.generate_audio("background music")
-```
-
-**Video Generation:**
-```python
-# Old
 from models.video import create_video
-video_path = create_video(images, audio)
-
-# New
-from src.vidgen.models.video import VideoModel
-video_model = VideoModel(config)
-video_path = video_model.generate_video_with_transitions(
-    image_paths=images,
-    audio_path=audio,
-    transition_type="fade"
-)
-```
-
-**Image Generation:**
-```python
-# Old
 from models.image import generate_image
-image_path = generate_image(prompt)
+from models.tts import text_to_speech
 
-# New
-from src.vidgen.models.image import ImageModel
+# New organized imports
+from vidgen.models.audio import AudioModel
+from vidgen.models.video import VideoModel
+from vidgen.models.image import ImageModel
+from vidgen.models.tts import TTSModel
+
+# Initialize models
+config = VideoGenConfig()
+audio_model = AudioModel(config)
+video_model = VideoModel(config)
 image_model = ImageModel(config)
-image_path = image_model.generate_image(prompt)
+tts_model = TTSModel(config)
 ```
 
-**Text-to-Speech:**
+**Service Layer Imports:**
 ```python
-# Old
-from models.tts import text_to_speech
-speech_path = text_to_speech(text)
+# Old direct function calls
+from utils import parse_script, assemble_video
 
-# New
-from src.vidgen.models.tts import TTSModel
-tts_model = TTSModel(config)
-speech_path = tts_model.generate_speech(text)
+# New service-oriented approach
+from vidgen.services.script_parser import ScriptParser
+from vidgen.services.video_assembler import VideoAssembler
+from vidgen.services.gemini_api import GeminiAPIService
+
+# Initialize services
+script_parser = ScriptParser()
+video_assembler = VideoAssembler(config)
+gemini_service = GeminiAPIService(api_key="your_key")
+```
+
+**Main Application Structure:**
+```python
+# Old monolithic structure
+# vidgen.py
+def main():
+    # All logic in one file
+    pass
+
+# New modular structure
+from vidgen.main import VidGenApp
+from vidgen.ui.gradio_app import GradioInterface
+
+app = VidGenApp(config=VideoGenConfig())
+ui = GradioInterface(app)
+ui.launch()
 ```
 
 #### 3. Update Main Application

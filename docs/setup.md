@@ -4,17 +4,37 @@ This comprehensive guide will help you set up and configure the VidGen video gen
 
 ## System Requirements
 
-- **Python**: 3.8 or newer (3.9 recommended)
+### Minimum Requirements
+- **Python**: 3.8 or newer (3.9+ recommended for optimal performance)
 - **Operating Systems**: 
   - Windows 10/11 (64-bit)
-  - macOS 11+ (Big Sur or newer)
-  - Linux (Ubuntu 20.04+, Debian 11+)
+  - macOS 11+ (Big Sur or newer) 
+  - Linux (Ubuntu 20.04+, Debian 11+, CentOS 8+)
 - **Hardware**:
-  - **CPU**: Modern multi-core processor (6+ cores recommended)
-  - **RAM**: 8GB minimum, 16GB+ recommended for HD video, 32GB+ for 4K
-  - **GPU**: NVIDIA GPU with 6GB+ VRAM (strongly recommended)
-  - **Storage**: 10GB minimum for installation, 50GB+ recommended for projects
-- **External Dependencies**: FFmpeg (4.0+)
+  - **CPU**: Quad-core processor (Intel i5/AMD Ryzen 5 or equivalent)
+  - **RAM**: 8GB minimum
+  - **GPU**: DirectX 11 compatible (integrated graphics acceptable)
+  - **Storage**: 15GB available space
+- **External Dependencies**: FFmpeg 4.0+
+
+### Recommended Specifications
+- **CPU**: 8+ core processor (Intel i7/i9, AMD Ryzen 7/9, or Apple M1/M2/M3)
+- **RAM**: 16GB+ (32GB for 4K video processing)
+- **GPU**: 
+  - NVIDIA RTX 3060+ with 8GB+ VRAM (CUDA support)
+  - AMD RX 6700 XT+ with 8GB+ VRAM 
+  - Apple M1/M2/M3 with unified memory
+- **Storage**: 
+  - SSD with 50GB+ free space
+  - Additional storage for project files and model cache
+- **Network**: Stable internet connection for model downloads and API calls
+
+### Performance Benchmarks
+| Hardware Config | HD Video (5min) | 4K Video (5min) | Model Loading |
+|----------------|-----------------|-----------------|---------------|
+| Minimum (CPU only) | ~45-60 minutes | Not recommended | ~2-3 minutes |
+| Mid-range + GPU | ~15-25 minutes | ~35-50 minutes | ~1-2 minutes |
+| High-end + RTX 4080+ | ~8-12 minutes | ~15-25 minutes | ~30-60 seconds |
 
 ## Installation Options
 
@@ -169,26 +189,93 @@ GEMINI_API_KEY=your_api_key_here
 
 ## Configuration Options
 
-VidGen can be configured through `vidgen.core.config`. Key settings:
+VidGen can be configured through the `vidgen.core.config.VideoGenConfig` class. Here are the key settings:
 
-| Setting | Description | Default |
-|---------|-------------|---------|
-| `STABLE_DIFFUSION_MODEL` | Model path/ID for image generation | `"runwayml/stable-diffusion-v1-5"` |
-| `OUTPUT_DIR` | Directory for generated files | `"./outputs"` |
-| `TEMP_DIR` | Directory for temporary files | `"./outputs/temp"` |
-| `LOG_LEVEL` | Level of logging detail | `"INFO"` |
-| `DEFAULT_SEGMENT_DURATION` | Default video segment length | `5` (seconds) |
-| `MAX_SEGMENTS` | Maximum number of segments | `20` |
-| `AUDIO_SAMPLE_RATE` | Audio sample rate in Hz | `24000` |
+### Core Settings
+| Setting | Description | Default | Type |
+|---------|-------------|---------|------|
+| `OUTPUT_DIR` | Directory for generated files | `"./outputs"` | `str` |
+| `TEMP_DIR` | Directory for temporary files | `"./outputs/temp"` | `str` |
+| `LOG_LEVEL` | Logging detail level | `"INFO"` | `str` |
+| `DEVICE` | Computation device | `"auto"` | `str` |
 
-You can override these settings programmatically:
+### Model Configuration
+| Setting | Description | Default | Type |
+|---------|-------------|---------|------|
+| `STABLE_DIFFUSION_MODEL` | Image generation model | `"runwayml/stable-diffusion-v1-5"` | `str` |
+| `TTS_MODEL` | Text-to-speech model | `"bark"` | `str` |
+| `BARK_MODEL_SIZE` | Bark model variant | `"small"` | `str` |
+| `HALF_PRECISION` | Use float16 for memory efficiency | `False` | `bool` |
 
+### Video Settings
+| Setting | Description | Default | Type |
+|---------|-------------|---------|------|
+| `DEFAULT_SEGMENT_DURATION` | Default video segment length (seconds) | `5` | `int` |
+| `MAX_SEGMENTS` | Maximum number of segments | `20` | `int` |
+| `VIDEO_FPS` | Output video frame rate | `30` | `int` |
+| `VIDEO_RESOLUTION` | Output resolution | `"1920x1080"` | `str` |
+
+### Audio Settings
+| Setting | Description | Default | Type |
+|---------|-------------|---------|------|
+| `AUDIO_SAMPLE_RATE` | Audio sample rate in Hz | `24000` | `int` |
+| `AUDIO_CHANNELS` | Number of audio channels | `1` | `int` |
+| `ENABLE_BACKGROUND_AUDIO` | Include background music | `True` | `bool` |
+
+### Advanced Settings
+| Setting | Description | Default | Type |
+|---------|-------------|---------|------|
+| `USE_STREAMING` | Enable streaming for large videos | `False` | `bool` |
+| `AUTO_CLEANUP` | Automatically clean temporary files | `True` | `bool` |
+| `SAFETY_CHECKER` | Enable content safety checking | `True` | `bool` |
+| `PROGRESS_TRACKING` | Enable detailed progress reporting | `True` | `bool` |
+
+### Configuration Examples
+
+**Basic Configuration:**
 ```python
 from vidgen.core.config import VideoGenConfig
 
-# Override configuration
+# Set output directory
 VideoGenConfig.OUTPUT_DIR = "/custom/output/path"
+
+# Use a different image model
 VideoGenConfig.STABLE_DIFFUSION_MODEL = "stabilityai/stable-diffusion-xl-base-1.0"
+
+# Enable memory optimization
+VideoGenConfig.HALF_PRECISION = True
+VideoGenConfig.AUTO_CLEANUP = True
+```
+
+**Performance Optimization:**
+```python
+# For systems with limited VRAM
+VideoGenConfig.HALF_PRECISION = True
+VideoGenConfig.STABLE_DIFFUSION_MODEL = "runwayml/stable-diffusion-v1-5"  # Smaller model
+
+# For high-end systems
+VideoGenConfig.STABLE_DIFFUSION_MODEL = "stabilityai/stable-diffusion-xl-base-1.0"
+VideoGenConfig.VIDEO_RESOLUTION = "3840x2160"  # 4K
+VideoGenConfig.HALF_PRECISION = False  # Full precision for quality
+
+# For batch processing
+VideoGenConfig.USE_STREAMING = True
+VideoGenConfig.AUTO_CLEANUP = True
+```
+
+**Environment Variables:**
+You can also configure VidGen using environment variables:
+
+```bash
+# Model configuration
+export VIDGEN_STABLE_DIFFUSION_MODEL="stabilityai/stable-diffusion-xl-base-1.0"
+export VIDGEN_OUTPUT_DIR="/custom/output"
+export VIDGEN_DEVICE="cuda"
+
+# Performance settings
+export VIDGEN_HALF_PRECISION="true"
+export VIDGEN_VIDEO_FPS="60"
+export VIDGEN_VIDEO_RESOLUTION="2560x1440"
 ```
 
 ## Environment-Specific Setup

@@ -90,8 +90,7 @@ async def generate_video_async(script, gemini_api_key, segment_duration, seed, p
         
         update_progress("🚀 Starting video generation...", 0)
         logger.info(f"Starting video generation for script: {script[:100]}...")
-        
-        # Call Gemini API with error handling
+          # Call Gemini API with error handling
         try:
             update_progress("🔍 Analyzing script with Gemini AI...", 10)
             detailed_script = call_gemini_api(script, gemini_api_key, segment_duration)
@@ -101,7 +100,8 @@ async def generate_video_async(script, gemini_api_key, segment_duration, seed, p
         except Exception as e:
             logger.error(f"Gemini API call failed: {e}")
             return (f"Error: Gemini API call failed: {str(e)}", None, [], [], [], [], None)
-          # Parse script with error handling
+        
+        # Parse script with error handling
         try:
             update_progress("📝 Parsing detailed script...", 30)
             parsed = parse_detailed_script(detailed_script)
@@ -170,8 +170,7 @@ async def generate_video_async(script, gemini_api_key, segment_duration, seed, p
         except Exception as e:
             logger.error(f"Character image generation failed: {e}")
             character_images = []
-        
-        # Assemble final video with error handling
+          # Assemble final video with error handling
         try:
             update_progress("🎬 Assembling final video...", 98)
             final_video_path = await loop.run_in_executor(
@@ -186,7 +185,8 @@ async def generate_video_async(script, gemini_api_key, segment_duration, seed, p
         except Exception as e:
             logger.error(f"Video assembly failed: {e}")
             final_video_path = None
-          return (
+        
+        return (
             detailed_script,
             str(parsed),
             tts_audios,
