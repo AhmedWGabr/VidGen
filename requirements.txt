@@ -8,3 +8,4 @@ accelerate
 safetensors
 scipy
 torch
+huggingface_hub

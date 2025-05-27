@@ -4,6 +4,8 @@ import os
 import torch
 from pathlib import Path
 import shutil
+from typing import Dict, Optional
+from vidgen.core.config import VideoGenConfig
 
 logger = logging.getLogger("VidGen.models.utils")
 
@@ -123,3 +125,54 @@ def backup_model_weights(model_path, backup_dir):
         logger.info(f"Model backup created: {backup_path}")
     except Exception as e:
         logger.error(f"Failed to create model backup: {e}")
+
+def setup_huggingface_auth():
+    """
+    Set up Hugging Face authentication in environment variables.
+    
+    This ensures that the Hugging Face Hub library can access models
+    using the configured token from VideoGenConfig.
+    """
+    if VideoGenConfig.HUGGINGFACE_TOKEN:
+        # Set all possible HF token environment variables
+        os.environ["HUGGINGFACE_HUB_TOKEN"] = VideoGenConfig.HUGGINGFACE_TOKEN
+        os.environ["HF_TOKEN"] = VideoGenConfig.HUGGINGFACE_TOKEN
+        os.environ["HUGGINGFACE_TOKEN"] = VideoGenConfig.HUGGINGFACE_TOKEN
+        logger.info("Hugging Face authentication configured")
+    else:
+        logger.debug("No Hugging Face token configured - using public model access only")
+
+def validate_model_access(model_name: str) -> Dict[str, bool]:
+    """
+    Validate that a model can be accessed with current authentication.
+    
+    Args:
+        model_name: Name of the model to validate
+        
+    Returns:
+        dict: Validation results including access status and error info
+    """
+    validation = {
+        "accessible": False,
+        "requires_auth": False,
+        "error": None
+    }
+    
+    try:
+        # Setup auth before testing
+        setup_huggingface_auth()
+        
+        # Try to access model info (lightweight check)
+        from huggingface_hub import model_info
+        info = model_info(model_name, token=VideoGenConfig.HUGGINGFACE_TOKEN)
+        validation["accessible"] = True
+        validation["requires_auth"] = info.private if hasattr(info, 'private') else False
+        
+    except ImportError:
+        validation["error"] = "huggingface_hub not installed"
+    except Exception as e:
+        validation["error"] = str(e)
+        if "401" in str(e) or "authentication" in str(e).lower():
+            validation["requires_auth"] = True
+            
+    return validation

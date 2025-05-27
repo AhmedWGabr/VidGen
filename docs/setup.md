@@ -163,7 +163,9 @@ Models are cached in the following locations:
 
 ## API Key Setup
 
-VidGen requires an API key for Google's Gemini API:
+VidGen requires API keys for optimal functionality:
+
+### 🔑 Required: Google Gemini API Key
 
 1. Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
 2. Create or log in to your Google account
@@ -181,10 +183,32 @@ $env:GEMINI_API_KEY = "your_api_key_here"
 export GEMINI_API_KEY="your_api_key_here"
 ```
 
+### 🔐 Optional: Hugging Face Token
+
+For accessing private models or increased rate limits:
+
+1. Visit [Hugging Face Settings](https://huggingface.co/settings/tokens)
+2. Create a new token with "Read" permissions
+3. Set the token as an environment variable:
+
+```bash
+# Windows (Command Prompt)
+set HUGGINGFACE_TOKEN=your_token_here
+
+# Windows (PowerShell)
+$env:HUGGINGFACE_TOKEN = "your_token_here"
+
+# macOS/Linux
+export HUGGINGFACE_TOKEN="your_token_here"
+```
+
+### 📝 Configuration File
+
 Alternatively, create a `.env` file in the project root:
 
-```
+```env
 GEMINI_API_KEY=your_api_key_here
+HUGGINGFACE_TOKEN=your_token_here
 ```
 
 ## Configuration Options

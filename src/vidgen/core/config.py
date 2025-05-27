@@ -16,6 +16,8 @@ class VideoGenConfig:
         OUTPUT_DIR (str): Base directory for all generated output files
         TEMP_DIR (str): Directory for temporary files during processing
         GEMINI_MODEL (str): Google Gemini model version for script processing
+        GEMINI_API_KEY (str): Google Gemini API key for script processing
+        HUGGINGFACE_TOKEN (str): Hugging Face token for model authentication
         LOG_LEVEL (int): Logging verbosity level (logging.INFO, DEBUG, etc.)
     """
     # Model settings
@@ -24,11 +26,13 @@ class VideoGenConfig:
 
     # Paths
     OUTPUT_DIR = "outputs"
-    TEMP_DIR = "temp"
-
-    # API settings
+    TEMP_DIR = "temp"    # API settings
     GEMINI_MODEL = "gemini-2.0-flash-001"
-    LOG_LEVEL = logging.INFO    @classmethod
+    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+    HUGGINGFACE_TOKEN = os.getenv("HUGGINGFACE_TOKEN") or os.getenv("HF_TOKEN") or os.getenv("HUGGINGFACE_HUB_TOKEN")
+    LOG_LEVEL = logging.INFO
+
+    @classmethod
     def ensure_dirs(cls) -> None:
         """
         Ensure that output and temporary directories exist.
@@ -52,6 +56,45 @@ class VideoGenConfig:
             level=cls.LOG_LEVEL,
             format='%(asctime)s %(levelname)s %(name)s %(message)s',
         )
+
+    @classmethod
+    def validate_api_keys(cls) -> dict:
+        """
+        Validate that required API keys are configured.
+        
+        Returns:
+            dict: Validation results with status and missing keys
+        """
+        validation_results = {
+            "gemini_api_key": bool(cls.GEMINI_API_KEY),
+            "huggingface_token": bool(cls.HUGGINGFACE_TOKEN),
+            "missing_keys": []
+        }
+        
+        if not cls.GEMINI_API_KEY:
+            validation_results["missing_keys"].append("GEMINI_API_KEY")
+        
+        if not cls.HUGGINGFACE_TOKEN:
+            validation_results["missing_keys"].append("HUGGINGFACE_TOKEN (optional for public models)")
+        
+        validation_results["all_required_present"] = bool(cls.GEMINI_API_KEY)
+        
+        return validation_results
+    
+    @classmethod
+    def get_huggingface_auth_kwargs(cls) -> dict:
+        """
+        Get authentication kwargs for Hugging Face model loading.
+        
+        Returns:
+            dict: Kwargs to pass to Hugging Face model loading functions
+        """
+        if cls.HUGGINGFACE_TOKEN:
+            return {
+                "use_auth_token": cls.HUGGINGFACE_TOKEN,
+                "token": cls.HUGGINGFACE_TOKEN  # For newer transformers versions
+            }
+        return {}
 
 # For backward compatibility with legacy code
 Config = VideoGenConfig

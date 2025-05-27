@@ -85,7 +85,9 @@ pytest>=7.4.0            # Testing framework
 
 ### 🌐 API Requirements
 - **Google Gemini API Key**: For script analysis and enhancement
-- **Hugging Face Token**: For accessing premium models (optional)
+- **Hugging Face Token**: For accessing premium/private models (optional but recommended)
+
+**🔧 Centralized Authentication**: All API keys are managed through the unified `VideoGenConfig` class with automatic environment variable detection.
 
 See `requirements.txt` for the complete dependency list with pinned versions.
 
@@ -368,10 +370,10 @@ VidGen uses a comprehensive configuration system that can be customized via envi
 
 ```python
 # src/vidgen/core/config.py
-class Config:
+class VideoGenConfig:
     # API Settings
     GEMINI_API_KEY = "your_gemini_api_key"
-    HUGGINGFACE_TOKEN = "your_hf_token"
+    HUGGINGFACE_TOKEN = "your_hf_token"  # For private/premium models
     
     # Model Settings
     IMAGE_MODEL = "stabilityai/stable-diffusion-xl-base-1.0"
@@ -385,6 +387,15 @@ class Config:
     # Audio Settings
     AUDIO_SAMPLE_RATE = 44100
     AUDIO_CHANNELS = 2
+
+# Validate your configuration
+from src.vidgen.core.config import VideoGenConfig
+
+validation = VideoGenConfig.validate_api_keys()
+if validation["all_required_present"]:
+    print("✅ All required API keys configured!")
+else:
+    print(f"⚠️ Missing keys: {validation['missing_keys']}")
 ```
 
 ## 🧪 Testing
