@@ -1,6 +1,8 @@
+import subprocess
+
 def assemble_video(video_segments, tts_audios, background_audios, character_images, output_path="final_video.mp4"):
     """
-    Placeholder for video assembly using ffmpeg.
+    Assemble video segments, TTS audio, background audio, and character images into a final video using ffmpeg.
     Args:
         video_segments (list): Paths to video segment files.
         tts_audios (list): Paths to TTS audio files.
@@ -10,6 +12,63 @@ def assemble_video(video_segments, tts_audios, background_audios, character_imag
     Returns:
         str: Path to final assembled video.
     """
-    # TODO: Implement ffmpeg-based assembly
-    # For now, just return the output path as a placeholder
+    # Basic implementation: concatenate video segments and overlay audio
+    if not video_segments:
+        return "no_video_segments.mp4"
+
+    # Concatenate video segments
+    with open("segments.txt", "w") as f:
+        for seg in video_segments:
+            f.write(f"file '{seg}'\n")
+    concat_cmd = [
+        "ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", "segments.txt",
+        "-c", "copy", "temp_video.mp4"
+    ]
+    subprocess.run(concat_cmd, check=True)
+
+    # Mix TTS and background audio
+    if tts_audios and background_audios:
+        audio_inputs = []
+        for tts, bg in zip(tts_audios, background_audios):
+            mixed = f"mixed_{tts}"
+            mix_cmd = [
+                "ffmpeg", "-y", "-i", tts, "-i", bg, "-filter_complex",
+                "[0:a][1:a]amix=inputs=2:duration=first:dropout_transition=2", mixed
+            ]
+            subprocess.run(mix_cmd, check=True)
+            audio_inputs.append(mixed)
+        # Concatenate mixed audio
+        with open("audios.txt", "w") as f:
+            for a in audio_inputs:
+                f.write(f"file '{a}'\n")
+        concat_audio_cmd = [
+            "ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", "audios.txt",
+            "-c", "copy", "final_audio.wav"
+        ]
+        subprocess.run(concat_audio_cmd, check=True)
+        audio_file = "final_audio.wav"
+    elif tts_audios:
+        # Only TTS audio
+        with open("audios.txt", "w") as f:
+            for a in tts_audios:
+                f.write(f"file '{a}'\n")
+        concat_audio_cmd = [
+            "ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", "audios.txt",
+            "-c", "copy", "final_audio.wav"
+        ]
+        subprocess.run(concat_audio_cmd, check=True)
+        audio_file = "final_audio.wav"
+    else:
+        audio_file = None
+
+    # Combine video and audio
+    if audio_file:
+        final_cmd = [
+            "ffmpeg", "-y", "-i", "temp_video.mp4", "-i", audio_file, "-c:v", "copy", "-c:a", "aac", output_path
+        ]
+        subprocess.run(final_cmd, check=True)
+    else:
+        # No audio, just video
+        subprocess.run(["cp", "temp_video.mp4", output_path], check=True)
+
     return output_path

@@ -61,13 +61,11 @@ def generate_video(script, gemini_api_key, segment_duration, seed):
     detailed_script = call_gemini_api(script, gemini_api_key, segment_duration)
     parsed = parse_detailed_script(detailed_script)
 
-    # Call model stubs (placeholders)
     video_segments = [generate_video_segment(cmd) for cmd in parsed["video"]]
     tts_audios = [generate_tts_audio(cmd) for cmd in parsed["tts"]]
     background_audios = [generate_background_audio(cmd) for cmd in parsed["audio"]]
     character_images = [generate_character_image(cmd, seed=seed) for cmd in parsed["image"]]
 
-    # Assemble final video (placeholder)
     final_video_path = assemble_video(video_segments, tts_audios, background_audios, character_images)
 
     return (

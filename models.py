@@ -1,13 +1,31 @@
 import os
 
+import subprocess
+
 def generate_video_segment(video_command):
     """
-    Placeholder for local video generation model.
-    Returns a static video file for now.
+    Generate a video segment by combining a generated character image and TTS audio.
     """
-    # Create a 1-second black video using ffmpeg
-    output_path = "video_segment.mp4"
-    os.system(f"ffmpeg -f lavfi -i color=c=black:s=320x240:d=1 -y {output_path}")
+    from models import generate_character_image, generate_tts_audio
+    import uuid
+
+    # Generate image and audio for the segment
+    image_path = generate_character_image(video_command.get("image", ""), seed=42)
+    audio_path = generate_tts_audio(video_command.get("narration", ""))
+
+    output_path = f"video_segment_{uuid.uuid4().hex}.mp4"
+    # Create a video from the image and audio using ffmpeg
+    cmd = [
+        "ffmpeg", "-y",
+        "-loop", "1", "-i", image_path,
+        "-i", audio_path,
+        "-c:v", "libx264", "-tune", "stillimage",
+        "-c:a", "aac", "-b:a", "192k",
+        "-pix_fmt", "yuv420p",
+        "-shortest", "-t", "5",
+        output_path
+    ]
+    subprocess.run(cmd, check=True)
     return output_path
 
 def generate_tts_audio(tts_command):
