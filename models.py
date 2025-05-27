@@ -2,16 +2,38 @@ import os
 
 import subprocess
 
-def generate_video_segment(video_command):
+def generate_video_segment(video_command, face_cache=None, default_duration=5):
     """
     Generate a video segment by combining a generated character image and TTS audio.
+    Uses segment duration and character face/seed if provided.
+    face_cache: dict mapping (character, seed) -> image_path to avoid regenerating faces.
     """
-    from models import generate_character_image, generate_tts_audio
     import uuid
 
-    # Generate image and audio for the segment
-    image_path = generate_character_image(video_command.get("image", ""), seed=42)
-    audio_path = generate_tts_audio(video_command.get("narration", ""))
+    # Extract info from video_command
+    narration = video_command.get("narration", "")
+    duration = float(video_command.get("end", 0)) - float(video_command.get("start", 0))
+    if duration <= 0:
+        duration = default_duration
+
+    # Get character face info
+    character_face = video_command.get("character_face", {})
+    char_name = character_face.get("character", "")
+    face_prompt = character_face.get("face_prompt", "")
+    face_seed = character_face.get("seed", 42)
+
+    # Use cache to avoid regenerating the same face
+    if face_cache is not None and char_name:
+        cache_key = (char_name, face_seed)
+        if cache_key in face_cache:
+            image_path = face_cache[cache_key]
+        else:
+            image_path = generate_character_image(face_prompt, seed=face_seed)
+            face_cache[cache_key] = image_path
+    else:
+        image_path = generate_character_image(face_prompt, seed=face_seed)
+
+    audio_path = generate_tts_audio(narration)
 
     output_path = f"video_segment_{uuid.uuid4().hex}.mp4"
     # Create a video from the image and audio using ffmpeg
@@ -22,9 +44,10 @@ def generate_video_segment(video_command):
         "-c:v", "libx264", "-tune", "stillimage",
         "-c:a", "aac", "-b:a", "192k",
         "-pix_fmt", "yuv420p",
-        "-shortest", "-t", "5",
+        "-shortest", "-t", str(duration),
         output_path
     ]
+    import subprocess
     subprocess.run(cmd, check=True)
     return output_path
 
