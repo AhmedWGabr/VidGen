@@ -1,6 +1,6 @@
 # VidGen 🎬 - AI-Powered Video Generation Framework
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/AhmedWGabr/VidGen/tree/main/VidGen.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/AhmedWGabr/VidGen/blob/main/VidGen_Colab.ipynb)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Tests](https://img.shields.io/badge/tests-70%2B%20cases-green.svg)](tests/)
@@ -189,7 +189,30 @@ pip install -e ".[dev]"
 pre-commit install
 ```
 
-#### Method 3: Docker Installation (Coming Soon)
+#### Method 3: Google Colab (Zero Setup - Recommended for Beginners)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/AhmedWGabr/VidGen/blob/main/VidGen_Colab.ipynb)
+
+Experience VidGen instantly with zero setup required! Our interactive Colab notebook provides:
+
+- **🚀 One-Click Setup**: Automated installation of all dependencies
+- **🔥 Free GPU Access**: Leverage Google's T4/A100 GPUs for fast generation
+- **📱 Mobile Friendly**: Generate videos from your phone or tablet
+- **☁️ Cloud Storage**: No local storage requirements
+- **🎓 Interactive Tutorial**: Step-by-step guidance for beginners
+
+```bash
+# Simply click the Colab badge above or manually:
+# 1. Open: https://colab.research.google.com/github/AhmedWGabr/VidGen/blob/main/VidGen_Colab.ipynb
+# 2. Enable GPU: Runtime → Change runtime type → Hardware accelerator → GPU
+# 3. Run the setup cell and follow the interactive tutorial
+```
+
+**🔑 API Key Setup for Colab:**
+1. Get your free Gemini API key: [Google AI Studio](https://makersuite.google.com/)
+2. In Colab: Secrets tab (🔑) → Add secret → Name: `GEMINI_API_KEY`
+3. Run the setup cell to start generating videos instantly!
+
+#### Method 4: Docker Installation (Coming Soon)
 ```bash
 # Quick start with Docker
 docker pull ahmedwgabr/vidgen:latest
@@ -248,6 +271,40 @@ video_path = generator.generate_video(
 )
 
 print(f"✅ Video generated successfully: {video_path}")
+```
+
+#### 4. Google Colab Usage (Interactive Notebook)
+```python
+# In Google Colab, use the interactive notebook for guided video generation:
+# 1. Open the VidGen_Colab.ipynb notebook
+# 2. Follow the step-by-step cells for setup and generation
+# 3. Use the built-in examples or create your own scripts
+
+# Quick Colab example:
+from vidgen.main import main as vidgen_main
+import os
+
+# Set API key (use Colab secrets for security)
+from google.colab import userdata
+os.environ['GEMINI_API_KEY'] = userdata.get('GEMINI_API_KEY')
+
+# Create and generate video
+script = """
+Title: "Future of AI"
+A modern tech office with holographic displays.
+[Background: Futuristic ambient music]
+NARRATOR: "Welcome to the future of artificial intelligence."
+"""
+
+# Generate video with progress tracking
+video_path = vidgen_main(
+    script_text=script,
+    output_filename="ai_future.mp4"
+)
+
+# Download the result
+from google.colab import files
+files.download(video_path)
 ```
 
 ### 3. Advanced Usage Examples
@@ -472,8 +529,43 @@ If you're upgrading from an older version:
    
    @with_error_recovery
    def generate_video_safe(...):
-       return generate_video(...)
-   ```
+       return generate_video(...)   ```
+
+## 📁 Project Files Overview
+
+### 🚀 Getting Started Files
+- **`VidGen_Colab.ipynb`** - Interactive Google Colab notebook for zero-setup usage
+- **`setup_colab.py`** - Automated Colab environment setup script
+- **`requirements_colab.txt`** - Optimized dependencies for Google Colab
+- **`requirements.txt`** - Standard Python package requirements
+- **`setup.py`** - Python package installation configuration
+
+### 🎬 Main Application Files
+- **`run_vidgen.py`** - Main entry point for running VidGen
+- **`run.py`** - Alternative launcher script
+- **`src/vidgen/main.py`** - Core application logic and orchestration
+
+### 📚 Documentation & Guides
+- **`README.md`** - This comprehensive guide
+- **`docs/API_REFERENCE.md`** - Complete API documentation
+- **`docs/setup.md`** - Detailed installation and configuration guide
+- **`docs/examples.md`** - Usage examples and tutorials
+- **`docs/MIGRATION_GUIDE.md`** - Migration guide from legacy versions
+- **`MODEL_FILES.md`** - AI models documentation and requirements
+- **`STRUCTURE.md`** - Project architecture and design patterns
+
+### 📂 Resource Directories
+- **`data/samples/`** - Example scripts and templates
+- **`outputs/`** - Generated videos, audio, and images
+- **`tests/`** - Comprehensive test suite (70+ test cases)
+- **`scripts/`** - Utility scripts for setup and maintenance
+- **`legacy/`** - Previous version files (deprecated)
+
+### 🔧 Development & Testing
+- **`MIGRATION_CHECKLIST.md`** - Development progress tracking
+- **`tests/test_integration.py`** - End-to-end functionality tests
+- **`scripts/download_models.py`** - AI model downloading utility
+- **`scripts/cleanup.py`** - Cache and temporary file management
 
 ## 🤝 Contributing
 
