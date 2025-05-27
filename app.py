@@ -8,10 +8,14 @@ from models import (
     generate_character_image,
 )
 from assemble import assemble_video
-from config import Config
+from config import Config, VideoGenConfig
 import asyncio
+import logging
 
 Config.ensure_dirs()
+VideoGenConfig.ensure_dirs()
+VideoGenConfig.configure_logging()
+logger = logging.getLogger("VidGen.app")
 
 def call_gemini_api(script, api_key, segment_duration=5):
     """
@@ -49,20 +53,20 @@ def call_gemini_api(script, api_key, segment_duration=5):
             }
         ]
     }
-    response = requests.post(url, headers=headers, params=params, json=data)
-    if response.status_code == 200:
-        result = response.json()
-        try:
-            return result["candidates"][0]["content"]["parts"][0]["text"]
-        except Exception:
-            return "Failed to parse Gemini response."
-    else:
-        return f"Gemini API error: {response.status_code} {response.text}"
+    try:
+        response = requests.post(url, headers=headers, params=params, json=data, timeout=60)
+        response.raise_for_status()
+        return response.json()
+    except requests.RequestException as e:
+        logger.error(f"Gemini API call failed: {e}")
+        return None
 
 async def generate_video_async(script, gemini_api_key, segment_duration, seed):
     if not script or not gemini_api_key:
         return [None] * 7
     detailed_script = call_gemini_api(script, gemini_api_key, segment_duration)
+    if detailed_script is None:
+        return [None] * 7
     parsed = parse_detailed_script(detailed_script)
     face_cache = {}
     loop = asyncio.get_event_loop()
