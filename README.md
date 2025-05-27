@@ -1,6 +1,6 @@
 # VidGen
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/AhmedWGabr/VidGen/blob/main/VidGen.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/AhmedWGabr/VidGen/tree/main/VidGen.ipynb)
 
 VidGen is a Python-based project for video generation and processing.  
 This repository contains scripts and models for assembling, processing, and generating video content.
