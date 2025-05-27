@@ -190,6 +190,16 @@ pre-commit install
 ```
 
 #### Method 3: Google Colab (Zero Setup - Recommended for Beginners)
+
+🎯 **Two Ways to Use VidGen in Colab:**
+
+**Option A: Direct Notebook Upload (Recommended)**
+1. Download the notebook: [`VidGen_Colab.ipynb`](./VidGen_Colab.ipynb)
+2. Upload to Google Colab: [colab.research.google.com](https://colab.research.google.com/)
+3. Enable GPU: Runtime → Change runtime type → Hardware accelerator → GPU
+4. Run all cells for automated setup and demo
+
+**Option B: GitHub Integration (if repository is public)**
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/AhmedWGabr/VidGen/blob/main/VidGen_Colab.ipynb)
 
 Experience VidGen instantly with zero setup required! Our interactive Colab notebook provides:
@@ -199,18 +209,19 @@ Experience VidGen instantly with zero setup required! Our interactive Colab note
 - **📱 Mobile Friendly**: Generate videos from your phone or tablet
 - **☁️ Cloud Storage**: No local storage requirements
 - **🎓 Interactive Tutorial**: Step-by-step guidance for beginners
-
-```bash
-# Simply click the Colab badge above or manually:
-# 1. Open: https://colab.research.google.com/github/AhmedWGabr/VidGen/blob/main/VidGen_Colab.ipynb
-# 2. Enable GPU: Runtime → Change runtime type → Hardware accelerator → GPU
-# 3. Run the setup cell and follow the interactive tutorial
-```
+- **🔧 Fallback Setup**: Manual installation if GitHub access fails
 
 **🔑 API Key Setup for Colab:**
 1. Get your free Gemini API key: [Google AI Studio](https://makersuite.google.com/)
 2. In Colab: Secrets tab (🔑) → Add secret → Name: `GEMINI_API_KEY`
 3. Run the setup cell to start generating videos instantly!
+
+**🛠️ Colab Features:**
+- Automatic GPU detection and optimization
+- Fallback manual setup if repository cloning fails
+- Interactive demo with sample scripts
+- Resource monitoring and optimization tips
+- Direct video preview and download capabilities
 
 #### Method 4: Docker Installation (Coming Soon)
 ```bash
@@ -535,6 +546,9 @@ If you're upgrading from an older version:
 
 ### 🚀 Getting Started Files
 - **`VidGen_Colab.ipynb`** - Interactive Google Colab notebook for zero-setup usage
+  - Download this file and upload to [Google Colab](https://colab.research.google.com/) for instant access
+  - Includes automated setup, fallback installation, and interactive demos
+  - Compatible with free Colab GPU runtime (T4/A100)
 - **`setup_colab.py`** - Automated Colab environment setup script
 - **`requirements_colab.txt`** - Optimized dependencies for Google Colab
 - **`requirements.txt`** - Standard Python package requirements
