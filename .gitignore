@@ -68,15 +68,7 @@ coverage.xml
 # Local files
 *.local
 
-# =============================================================================
-# IMPORTANT: MODEL FILES CLARIFICATION
-# =============================================================================
-# ✅ INCLUDED: All Python source code in src/vidgen/models/ (video.py, image.py, etc.)
-# ❌ EXCLUDED: Large binary model weights and downloaded pretrained models
-# See MODEL_FILES.md for detailed explanation
-# =============================================================================
-
-# VidGen specific outputs (generated content)
+# VidGen specific
 outputs/videos/*
 outputs/audio/*
 outputs/images/*
@@ -87,9 +79,6 @@ outputs/temp/*
 !outputs/temp/.gitkeep
 !outputs/README.md
 
-# IMPORTANT: src/vidgen/models/ contains SOURCE CODE and should be included
-# Only exclude large binary model files, not the Python source code
-
 # Media files (exclude by default, use git lfs if needed)
 *.mp4
 *.wav
@@ -98,28 +87,13 @@ outputs/temp/*
 *.jpeg
 *.gif
 
-# Large pre-trained model binaries (exclude, but keep source code)
-# Note: src/vidgen/models/ contains source code and should NOT be excluded
-pretrained_models/
-downloaded_models/
-model_cache/
+# Large model files
+models/
+pretrained/
 *.ckpt
 *.safetensors
 *.pth
 *.pt
-*.bin
-*.h5
-*.pkl
-*.pickle
-
-# Hugging Face cache (these are large downloaded models)
-.cache/huggingface/
-~/.cache/huggingface/
-
-# Model weights and checkpoints
-checkpoints/
-weights/
-model_weights/
 
 # API keys and sensitive files
 .api_keys
