@@ -1,0 +1,15 @@
+# VidGen Script Template
+# Use this template to structure your video scripts
+
+Scene [NUMBER]: [SCENE DESCRIPTION]
+Character: [CHARACTER_NAME]
+Dialogue: [SPOKEN_TEXT]
+
+# Example:
+# Scene 1: A bustling marketplace
+# Character: Merchant
+# Dialogue: Welcome to our market! Fresh fruits and vegetables available today.
+
+# Scene 2: A quiet library
+# Character: Librarian
+# Dialogue: Please keep your voices down and enjoy your reading.
