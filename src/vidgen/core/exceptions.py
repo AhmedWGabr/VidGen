@@ -1,52 +1,87 @@
 """
-Custom exceptions for VidGen
+Custom exceptions for VidGen video generation framework.
+
+This module defines a comprehensive hierarchy of exceptions used throughout
+VidGen to provide meaningful error messages and recovery suggestions for
+different types of failures that can occur during video generation.
+
+The exception hierarchy follows the pattern:
+    VidGenException (base)
+    ├── ScriptParsingError
+    ├── ModelLoadError  
+    ├── AudioGenerationError
+    ├── ImageGenerationError
+    ├── VideoAssemblyError
+    ├── ConfigurationError
+    ├── FFmpegError
+    ├── APIError
+    ├── FileSystemError
+    └── MemoryError
 """
 
+from typing import Optional
+
 class VidGenException(Exception):
-    """Base exception for VidGen"""
-    def __init__(self, message, original_exception=None, recovery_suggestion=None):
+    """
+    Base exception class for all VidGen-related errors.
+    
+    This exception provides additional context beyond the standard Exception
+    class, including the original exception that caused the error and
+    suggested recovery actions.
+    
+    Args:
+        message (str): Human-readable error description
+        original_exception (Exception, optional): The underlying exception that caused this error
+        recovery_suggestion (str, optional): Suggested actions to recover from this error
+        
+    Attributes:
+        original_exception: The original exception if this error was caused by another exception
+        recovery_suggestion: Human-readable suggestion for how to fix the error
+    """
+    def __init__(self, message: str, original_exception: Optional[Exception] = None, 
+                 recovery_suggestion: Optional[str] = None):
         super().__init__(message)
         self.original_exception = original_exception
         self.recovery_suggestion = recovery_suggestion
 
 class ScriptParsingError(VidGenException):
-    """Raised when script parsing fails"""
+    """Raised when script parsing or analysis fails."""
     pass
 
 class ModelLoadError(VidGenException):
-    """Raised when model loading fails"""
+    """Raised when AI model loading or initialization fails."""
     pass
 
 class AudioGenerationError(VidGenException):
-    """Raised when audio generation fails"""
+    """Raised when background audio or TTS generation fails."""
     pass
 
 class ImageGenerationError(VidGenException):
-    """Raised when image generation fails"""
+    """Raised when image generation through Stable Diffusion fails."""
     pass
 
 class VideoAssemblyError(VidGenException):
-    """Raised when video assembly fails"""
+    """Raised when video segment assembly or final video creation fails."""
     pass
 
 class ConfigurationError(VidGenException):
-    """Raised when configuration is invalid"""
+    """Raised when configuration settings are invalid or missing."""
     pass
 
 class FFmpegError(VidGenException):
-    """Raised when FFmpeg operations fail"""
+    """Raised when FFmpeg operations fail during audio/video processing."""
     pass
 
 class APIError(VidGenException):
-    """Raised when external API calls fail"""
+    """Raised when external API calls (e.g., Gemini) fail."""
     pass
 
 class FileSystemError(VidGenException):
-    """Raised when file system operations fail"""
+    """Raised when file system operations fail."""
     pass
 
 class MemoryError(VidGenException):
-    """Raised when memory management issues occur"""
+    """Raised when memory management issues occur during processing."""
     pass
 
 class DependencyError(VidGenException):

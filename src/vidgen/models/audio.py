@@ -1,21 +1,46 @@
+"""
+Audio generation module for VidGen.
+
+This module provides comprehensive audio generation capabilities including:
+- Procedural background audio synthesis (ambient, music, effects)
+- Audio command analysis and type detection
+- Multi-track audio mixing with FFmpeg
+- Frequency pattern generation for different audio styles
+
+The module supports various audio types and automatically generates appropriate
+soundscapes based on text descriptions.
+"""
+
 import os
 import logging
 import subprocess
 import re
 import random
 import math
+from typing import Tuple, Optional
 from vidgen.core.config import VideoGenConfig
 
-def generate_background_audio(audio_command):
+def generate_background_audio(audio_command: str) -> str:
     """
     Generate background audio/music from audio command description.
+    
     Supports different audio types: ambient, music, and sound effects.
+    Uses procedural synthesis with FFmpeg to create contextually appropriate audio.
     
     Args:
-        audio_command (str): Description of the background audio to generate
+        audio_command (str): Description of the background audio to generate.
+                           Examples: "melancholy orchestral music", "forest ambience", 
+                           "upbeat electronic music", "silence"
         
     Returns:
-        str: Path to the generated audio file
+        str: Path to the generated audio file (.wav format)
+        
+    Raises:
+        AudioGenerationError: If audio generation fails
+        
+    Example:
+        >>> audio_path = generate_background_audio("peaceful nature sounds")
+        >>> print(audio_path)  # outputs/audio/background_audio_abc123.wav
     """
     logger = logging.getLogger("VidGen.models.audio")
     

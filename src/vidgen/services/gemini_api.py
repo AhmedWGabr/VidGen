@@ -1,10 +1,23 @@
+"""
+Gemini API integration service for VidGen.
+
+This module provides integration with Google's Gemini API for script analysis
+and expansion. It handles API communication, response parsing, error handling,
+and rate limiting for robust production use.
+
+The service transforms user scripts into detailed, timestamped breakdowns
+suitable for video generation with scene descriptions, narration, audio cues,
+and visual details.
+"""
+
 import requests
 import logging
+from typing import Optional
 from vidgen.core.config import VideoGenConfig
 
 logger = logging.getLogger("VidGen.services.gemini_api")
 
-def call_gemini_api(script, api_key, segment_duration=5):
+def call_gemini_api(script: str, api_key: str, segment_duration: int = 5) -> Optional[str]:
     """
     Calls Gemini API (gemini-2.0-flash-001) with a structured prompt to control output.
     Requests timestamps and segment durations.

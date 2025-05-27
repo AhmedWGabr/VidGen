@@ -1,0 +1,44 @@
+# VidGen Requirements for Google Colab
+# Optimized for Colab environment with GPU support
+
+# Core ML/AI libraries
+torch>=2.0.0
+torchvision>=0.15.0
+torchaudio>=2.0.0
+
+# Diffusion models and transformers
+diffusers>=0.21.0
+transformers>=4.30.0
+accelerate>=0.20.0
+xformers>=0.0.20  # For memory efficiency
+
+# Audio processing
+bark
+librosa>=0.9.0
+soundfile>=0.10.0
+scipy>=1.7.0
+
+# Image processing
+Pillow>=9.0.0
+opencv-python>=4.5.0
+
+# Video processing
+moviepy>=1.0.3
+
+# Web interface
+gradio>=3.35.0
+
+# API and networking
+requests>=2.28.0
+google-generativeai>=0.3.0
+
+# Data handling
+numpy>=1.21.0
+pydantic>=1.10.0
+
+# Utilities
+tqdm>=4.64.0
+uuid
+
+# Optional: For better performance in Colab
+optimum[onnxruntime-gpu]  # ONNX runtime for faster inference
