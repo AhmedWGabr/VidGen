@@ -8,6 +8,10 @@ from models import (
     generate_character_image,
 )
 from assemble import assemble_video
+from config import Config
+import asyncio
+
+Config.ensure_dirs()
 
 def call_gemini_api(script, api_key, segment_duration=5):
     """
@@ -55,20 +59,30 @@ def call_gemini_api(script, api_key, segment_duration=5):
     else:
         return f"Gemini API error: {response.status_code} {response.text}"
 
-def generate_video(script, gemini_api_key, segment_duration, seed):
+async def generate_video_async(script, gemini_api_key, segment_duration, seed):
     if not script or not gemini_api_key:
         return [None] * 7
     detailed_script = call_gemini_api(script, gemini_api_key, segment_duration)
     parsed = parse_detailed_script(detailed_script)
-
     face_cache = {}
-    video_segments = [generate_video_segment(cmd, face_cache=face_cache, default_duration=segment_duration) for cmd in parsed["video"]]
-    tts_audios = [generate_tts_audio(cmd) for cmd in parsed["tts"]]
-    background_audios = [generate_background_audio(cmd) for cmd in parsed["audio"]]
-    character_images = [generate_character_image(cmd, seed=seed) for cmd in parsed["image"]]
-
-    final_video_path = assemble_video(video_segments, tts_audios, background_audios, character_images)
-
+    loop = asyncio.get_event_loop()
+    video_segments = await asyncio.gather(*[
+        loop.run_in_executor(None, generate_video_segment, cmd, face_cache, segment_duration)
+        for cmd in parsed["video"]
+    ])
+    tts_audios = await asyncio.gather(*[
+        loop.run_in_executor(None, generate_tts_audio, cmd)
+        for cmd in parsed["tts"]
+    ])
+    background_audios = await asyncio.gather(*[
+        loop.run_in_executor(None, generate_background_audio, cmd)
+        for cmd in parsed["audio"]
+    ])
+    character_images = await asyncio.gather(*[
+        loop.run_in_executor(None, generate_character_image, cmd, seed)
+        for cmd in parsed["image"]
+    ])
+    final_video_path = await loop.run_in_executor(None, assemble_video, video_segments, tts_audios, background_audios, character_images)
     return (
         detailed_script,
         str(parsed),
@@ -78,6 +92,9 @@ def generate_video(script, gemini_api_key, segment_duration, seed):
         background_audios,
         final_video_path
     )
+
+def generate_video(script, gemini_api_key, segment_duration, seed):
+    return asyncio.run(generate_video_async(script, gemini_api_key, segment_duration, seed))
 
 with gr.Blocks() as demo:
     gr.Markdown("# Video Generator from Scene Script")

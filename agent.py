@@ -1,5 +1,13 @@
 import json
 
+def validate_segment(seg):
+    required_fields = ["start", "end", "narration"]
+    for field in required_fields:
+        if field not in seg:
+            raise ValueError(f"Missing required field: {field}")
+    if float(seg["end"]) <= float(seg["start"]):
+        raise ValueError("End time must be greater than start time")
+
 def parse_detailed_script(detailed_script):
     """
     Parses the detailed script from Gemini (expected as JSON list of segments)
@@ -23,6 +31,7 @@ def parse_detailed_script(detailed_script):
         image_cmds = []
         character_faces = {}
         for seg in segments:
+            validate_segment(seg)
             # Assume seg["image"] contains a character name or description
             char_desc = seg.get("image", "")
             if char_desc:

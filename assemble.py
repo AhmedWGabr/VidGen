@@ -1,6 +1,8 @@
 import subprocess
+import os
+from config import Config
 
-def assemble_video(video_segments, tts_audios, background_audios, character_images, output_path="final_video.mp4"):
+def assemble_video(video_segments, tts_audios, background_audios, character_images, output_path=None):
     """
     Assemble video segments, TTS audio, background audio, and character images into a final video using ffmpeg.
     Args:
@@ -16,13 +18,17 @@ def assemble_video(video_segments, tts_audios, background_audios, character_imag
     if not video_segments:
         return "no_video_segments.mp4"
 
+    if output_path is None:
+        output_path = os.path.join(Config.OUTPUT_DIR, "final_video.mp4")
+
     # Concatenate video segments
-    with open("segments.txt", "w") as f:
+    segments_txt = os.path.join(Config.TEMP_DIR, "segments.txt")
+    with open(segments_txt, "w") as f:
         for seg in video_segments:
             f.write(f"file '{seg}'\n")
     concat_cmd = [
-        "ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", "segments.txt",
-        "-c", "copy", "temp_video.mp4"
+        "ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", segments_txt,
+        "-c", "copy", os.path.join(Config.TEMP_DIR, "temp_video.mp4")
     ]
     subprocess.run(concat_cmd, check=True)
 
@@ -30,45 +36,46 @@ def assemble_video(video_segments, tts_audios, background_audios, character_imag
     if tts_audios and background_audios:
         audio_inputs = []
         for tts, bg in zip(tts_audios, background_audios):
-            mixed = f"mixed_{tts}"
+            mixed = os.path.join(Config.TEMP_DIR, f"mixed_{os.path.basename(tts)}")
             mix_cmd = [
                 "ffmpeg", "-y", "-i", tts, "-i", bg, "-filter_complex",
                 "[0:a][1:a]amix=inputs=2:duration=first:dropout_transition=2", mixed
             ]
             subprocess.run(mix_cmd, check=True)
             audio_inputs.append(mixed)
-        # Concatenate mixed audio
-        with open("audios.txt", "w") as f:
+        audios_txt = os.path.join(Config.TEMP_DIR, "audios.txt")
+        with open(audios_txt, "w") as f:
             for a in audio_inputs:
                 f.write(f"file '{a}'\n")
         concat_audio_cmd = [
-            "ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", "audios.txt",
-            "-c", "copy", "final_audio.wav"
+            "ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", audios_txt,
+            "-c", "copy", os.path.join(Config.TEMP_DIR, "final_audio.wav")
         ]
         subprocess.run(concat_audio_cmd, check=True)
-        audio_file = "final_audio.wav"
+        audio_file = os.path.join(Config.TEMP_DIR, "final_audio.wav")
     elif tts_audios:
-        # Only TTS audio
-        with open("audios.txt", "w") as f:
+        audios_txt = os.path.join(Config.TEMP_DIR, "audios.txt")
+        with open(audios_txt, "w") as f:
             for a in tts_audios:
                 f.write(f"file '{a}'\n")
         concat_audio_cmd = [
-            "ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", "audios.txt",
-            "-c", "copy", "final_audio.wav"
+            "ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", audios_txt,
+            "-c", "copy", os.path.join(Config.TEMP_DIR, "final_audio.wav")
         ]
         subprocess.run(concat_audio_cmd, check=True)
-        audio_file = "final_audio.wav"
+        audio_file = os.path.join(Config.TEMP_DIR, "final_audio.wav")
     else:
         audio_file = None
 
     # Combine video and audio
+    temp_video = os.path.join(Config.TEMP_DIR, "temp_video.mp4")
     if audio_file:
         final_cmd = [
-            "ffmpeg", "-y", "-i", "temp_video.mp4", "-i", audio_file, "-c:v", "copy", "-c:a", "aac", output_path
+            "ffmpeg", "-y", "-i", temp_video, "-i", audio_file, "-c:v", "copy", "-c:a", "aac", output_path
         ]
         subprocess.run(final_cmd, check=True)
     else:
         # No audio, just video
-        subprocess.run(["cp", "temp_video.mp4", output_path], check=True)
+        subprocess.run(["copy", temp_video, output_path], shell=True, check=True)
 
     return output_path
